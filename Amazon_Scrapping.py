@@ -8,7 +8,7 @@ link_start = 'https://amazon.com'
 
 def phone_scrap(initi, counter):
     if counter == 0:
-        return None;
+        return None
     name = initi[counter].select_one('a span')
     if(name is not None):
         result1 = name.getText().find('Best Seller')

@@ -1,8 +1,8 @@
 import requests
 import bs4
 class initial:
-  section = None
-  count = 0
+    section = None
+    count = 0
 	
 initial_obj = initial()
 
@@ -26,7 +26,7 @@ def init(page_number,url, atr):
         bs = bs4.BeautifulSoup(res.text, 'lxml')
         section = bs.select(atr)
         if(section != []):
-            break;
+            break
     count = len(section) - 1
     initial_obj.section = section
     initial_obj.count = count
