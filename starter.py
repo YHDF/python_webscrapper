@@ -1,6 +1,5 @@
 import mysql.connector
 import initialize
-import Amazon_Scrapping
 import Ebay_Scrapping
 import Jumia_Scrapping
 import WallMart_Scrapping
@@ -8,21 +7,22 @@ import re
 import hashlib
 
 page_number = 10
-group_name = ["APhones", "Ephones", "Jphones", "WMphones", "ELaptops", "EMacbooks", "WMLaptops", "JLaptops"]
-attributes = [""'.sg-col-20-of-24' + '.s-result-item'"", ".s-item", ".sku", ""'.Grid-col' + '.u-size-6-12' + '.u-size-1-4-m'"", ".s-item", ".s-item", ""'.Grid-col' + '.u-size-6-12' + '.u-size-1-4-m'"", ".sku"]
+dollar_to_mad = 9.89
+group_name = ["Ephonesfr","Ephones", "Jphones", "WMphones", "ELaptopsfr" ,"ELaptops", "EMacbooks", "WMLaptops", "JLaptops"]
+attributes = [".s-item", ".s-item", ""'.prd' + '._fb' + '.col' + '.c-prd'"", ""'.Grid-col' + '.u-size-6-12' + '.u-size-1-4-m'"",".s-item", ".s-item", ".s-item", ""'.Grid-col' + '.u-size-6-12' + '.u-size-1-4-m'"", ""'.prd' + '._fb' + '.c-prd' + '.col'""]
 
 host='127.0.0.1'
-port='3307'
+port='3306'
 user='root'
 password='root'
-database='test_py_code'
+database='Testing'
 
 url = ["" for x in range(len(group_name))]
-db = mysql.connector.connect(host=host, 
-                    port=port,  
-                    user=user,        
-                    passwd=password, 
-                    db=database)       
+db = mysql.connector.connect(host=host,
+                    port=port,
+                    user=user,
+                    passwd=password,
+                    db=database)
 cur = db.cursor()
 def get_url(s):
     cur.execute("SELECT link FROM "+database+".groups WHERE name = '" + group_name[s] + "';")
@@ -44,10 +44,8 @@ def temp_product_storage():
                 break
             data = [[0 for j in range(initdata.count)] for i in range(page_number)]
             for j in range(initdata.count):
-                if(group_name[s] == "Ephones" or group_name[s] == "ELaptops" or group_name[s] == "EMacbooks"):
+                if(group_name[s] == "Ephonesfr" or group_name[s] == "ELaptopsfr" or group_name[s] == "Ephones" or group_name[s] == "ELaptops" or group_name[s] == "EMacbooks"):
                     data[i][j] = Ebay_Scrapping.phone_scrap(initdata.section, j)
-                if(group_name[s] == "APhones" or group_name[s] == "AComputers"):
-                    data[i][j] = Amazon_Scrapping.phone_scrap(initdata.section, j)
                 if(group_name[s] == "Jphones" or group_name[s] == "JLaptops"):
                     data[i][j] = Jumia_Scrapping.phone_scrap(initdata, j)
                 if(group_name[s] == "WMphones" or group_name[s] == "WMLaptops"):
@@ -78,9 +76,9 @@ def temp_product_storage():
                         img_link[k] = " "
                 img_link = "".join(img_link)
                 data[i][j].name = name
-                if(prices == 'N/a' or prices == 'Amazon' or prices == 'alexa' or prices == 'Works' or prices == '5%' or prices == 'From' or prices == '10%' or prices == ''):
-                    prices = 0
                 prices = int(prices)
+                if(group_name[s] == "Jphones" or group_name[s] == "JLaptops"):
+                    prices = prices / dollar_to_mad
                 data[i][j].price = prices
                 data[i][j].img = img_link
                 id_product = hashlib.sha256(data[i][j].link.encode('utf-8')).hexdigest()
@@ -88,14 +86,12 @@ def temp_product_storage():
                 values = (id_product, get_grp(s),data[i][j].name, data[i][j].img, data[i][j].price, data[i][j].link)
                 cur.execute(sql_statement, values)
                 db.commit()
-            
+
 def random_choice() :
-    id_grp = 7 
+    id_grp = 7
     best_data = [[0 for j in range(8)] for i in range(20)]
     while id_grp <= 15:
-        if(id_grp == 11):
-            id_grp += 1
-        sql_statement = "SELECT * FROM "+database+".products WHERE name <> 'N/a' AND price <> 0 AND group_id = %s limit 0,2" %(str(id_grp))
+        sql_statement = "SELECT * FROM "+database+".products WHERE name <> 'N/a' AND price <> 0 AND group_id = %s limit 0,4" %(str(id_grp))
         cur.execute(sql_statement)
         temp_data = cur.fetchall()
         list_temp_data = list(temp_data)
@@ -107,7 +103,7 @@ def random_choice() :
             cur.execute(sql_statement, values)
         id_grp += 1
     db.commit()
-        
+
 
 
 def filter_identical(list_temp_data):
@@ -140,7 +136,7 @@ def product_storage():
         values = (row[0], row[1], row[2] , row[3], row[4], row[5], 0, 0)
         cur.execute(sql_statement, values)
     db.commit()
-        
+
 
 
 
