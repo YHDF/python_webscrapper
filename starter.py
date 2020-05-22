@@ -6,7 +6,7 @@ import WallMart_Scrapping
 import re
 import hashlib
 
-page_number = 10
+page_number = 1
 dollar_to_mad = 9.89
 group_name = ["Ephonesfr","Ephones", "Jphones", "WMphones", "ELaptopsfr" ,"ELaptops", "EMacbooks", "WMLaptops", "JLaptops"]
 attributes = [".s-item", ".s-item", ""'.prd' + '._fb' + '.col' + '.c-prd'"", ""'.Grid-col' + '.u-size-6-12' + '.u-size-1-4-m'"",".s-item", ".s-item", ".s-item", ""'.Grid-col' + '.u-size-6-12' + '.u-size-1-4-m'"", ""'.prd' + '._fb' + '.c-prd' + '.col'""]
@@ -56,7 +56,11 @@ def temp_product_storage():
                 prices = data[i][j].price
                 img_link = data[i][j].img
                 link = data[i][j].link
+                prices = prices.replace(' ', '')
+                prices = prices.replace('Dhs', '')
                 prices = prices.replace('$', '')
+                if(group_name[s] == "Ephonesfr" or group_name[s] == "ELaptopsfr"):
+                    prices = re.sub("\,.*", '' , prices)
                 prices = prices.replace(',', '')
                 prices = re.sub(' .*', '' , prices)
                 prices = re.sub("\..*", '' , prices)
@@ -79,6 +83,7 @@ def temp_product_storage():
                 prices = int(prices)
                 if(group_name[s] == "Jphones" or group_name[s] == "JLaptops"):
                     prices = prices / dollar_to_mad
+                    prices = int(prices)
                 data[i][j].price = prices
                 data[i][j].img = img_link
                 id_product = hashlib.sha256(data[i][j].link.encode('utf-8')).hexdigest()
